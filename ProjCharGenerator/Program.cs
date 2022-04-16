@@ -6,7 +6,7 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace generator
 {
-    class CharGenerator 
+    public class CharGenerator 
     {
         private string syms = "абвгдеёжзийклмнопрстуфхцчшщьыъэюя";
         protected char[] data;
@@ -23,7 +23,7 @@ namespace generator
         }
     }
 
-    class BigramGenerator : CharGenerator {
+    public class BigramGenerator : CharGenerator {
 
         private string syms = "абвгдежзийклмнопрстуфхцчшщьыэюя";
 
@@ -32,14 +32,14 @@ namespace generator
 
         private int LastCharIndex;
 
-        public BigramGenerator() : base()
+        public BigramGenerator(string filename) : base()
         {
             data = syms.ToCharArray();
             size = syms.Length;
 
             BigramTable = new int[this.size, this.size];
 
-            using (var parser = new TextFieldParser("../../../../data/bigram.csv")) {
+            using (var parser = new TextFieldParser(filename)) {
                 parser.TextFieldType = FieldType.Delimited;
                 parser.SetDelimiters(",");
                 for (int i = 0; i < this.size; i++)
@@ -77,6 +77,8 @@ namespace generator
             LastCharIndex = 0;
         }
 
+        public BigramGenerator() : this("../../../../data/bigram.csv") { }
+
         new public char GetSym()
         {
             int i = LastCharIndex;
@@ -103,7 +105,7 @@ namespace generator
         }
     }
 
-    class WordGenerator : CharGenerator
+    public class WordGenerator : CharGenerator
     {
         private string[] words;
         private int[] weights;
@@ -133,7 +135,7 @@ namespace generator
                     //Process row
                     string[] fields = parser.ReadFields();
 
-                    words[i] = fields[0];
+                    words[i] = fields[0] == null ? "" : fields[0];
                     weights[i] = int.Parse(fields[1]);
                 }
             }
@@ -213,7 +215,7 @@ namespace generator
         }
     }
 
-    class WordPairGenerator : WordGenerator 
+    public class WordPairGenerator : WordGenerator 
     {
         public WordPairGenerator(string filename) : base(filename)
         {
