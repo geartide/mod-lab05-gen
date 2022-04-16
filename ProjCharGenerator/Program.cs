@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
 using Microsoft.VisualBasic.FileIO;
@@ -227,22 +228,33 @@ namespace generator
     {
         static void Main(string[] args)
         {
-            WordGenerator gen = new WordGenerator();
-            SortedDictionary<char, int> stat = new SortedDictionary<char, int>();
-            for(int i = 0; i < 1000; i++) 
+            BigramGenerator b_gen = new BigramGenerator();
+            WordGenerator w_gen = new WordGenerator();
+            WordPairGenerator p_gen = new WordPairGenerator();
+
+            using (StreamWriter sw = new StreamWriter("BigramGeneratedText.txt"))
             {
-               char ch = gen.GetSym(); 
-               if (stat.ContainsKey(ch))
-                  stat[ch]++;
-               else
-                  stat.Add(ch, 1); Console.Write(ch);
+                for (int i = 0; i < 1000; i++)
+                {
+                    sw.Write(b_gen.GetSym());
+                }
             }
-            Console.Write('\n');
-            foreach (KeyValuePair<char, int> entry in stat) 
+
+            using (StreamWriter sw = new StreamWriter("WordGeneratedText.txt"))
             {
-                 Console.WriteLine("{0} - {1}",entry.Key,entry.Value/1000.0); 
+                for (int i = 0; i < 1000; i++)
+                {
+                    sw.Write(w_gen.GetSym());
+                }
             }
-            
+
+            using (StreamWriter sw = new StreamWriter("WordPairGeneratedText.txt"))
+            {
+                for (int i = 0; i < 1000; i++)
+                {
+                    sw.Write(p_gen.GetSym());
+                }
+            }
         }
     }
 }
