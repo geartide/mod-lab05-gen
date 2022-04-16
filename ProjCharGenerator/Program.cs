@@ -102,11 +102,132 @@ namespace generator
         }
     }
 
+    class WordGenerator : CharGenerator
+    {
+        private string[] words;
+        private int[] weights;
+
+        bool inWord;
+
+        int current_word_index;
+        int current_letter_index;
+
+        int TotalWeightSum;
+
+        const int WordCount = 100;
+
+        public WordGenerator(string filename) : base()
+        {
+            words = new string[WordCount];
+            weights = new int[WordCount];
+
+            this.size = WordCount;
+
+            using (var parser = new TextFieldParser(filename))
+            {
+                parser.TextFieldType = FieldType.Delimited;
+                parser.SetDelimiters(",");
+                for (int i = 0; i < this.size; i++)
+                {
+                    //Process row
+                    string[] fields = parser.ReadFields();
+
+                    words[i] = fields[0];
+                    weights[i] = int.Parse(fields[1]);
+                }
+            }
+
+            inWord = false;
+
+            current_word_index = 0;
+            current_letter_index = 0;
+
+            TotalWeightSum = 0;
+
+            foreach (var elem in weights)
+            {
+                TotalWeightSum += elem;
+            }
+        }
+
+        public WordGenerator() : this("../../../../data/words.csv")
+        {
+            
+        }
+
+        private void ChooseOutputString() {
+            int sourced_random_number = random.Next(0, this.TotalWeightSum);
+
+            int chosen_index = 0;
+
+            for (int i = 0; i < WordCount; i++)
+            {
+                chosen_index = i;
+
+                if (sourced_random_number - weights[i] < 0)
+                {
+                    break;
+                }
+                else
+                {
+                    sourced_random_number -= weights[i];
+                }
+            }
+
+            current_word_index = chosen_index;
+            current_letter_index = 0;
+            inWord = true;
+        }
+
+        new public char GetSym()
+        {
+            if (!inWord)
+            {
+                ChooseOutputString();
+                return words[current_word_index][current_letter_index++];
+            }
+            else
+            {
+                int word_length = words[current_word_index].Length;
+
+                if (current_letter_index < word_length)
+                {
+                    char ch = words[current_word_index][current_letter_index++];
+                    return ch;
+                }
+                else if (current_letter_index == word_length)
+                {
+                    current_letter_index++;
+                    return ' ';
+                }
+                else 
+                {
+                    inWord = false;
+                    current_word_index = 0;
+                    current_letter_index = 0;
+
+                    return GetSym();
+                }
+            }
+        }
+    }
+
+    class WordPairGenerator : WordGenerator 
+    {
+        public WordPairGenerator(string filename) : base(filename)
+        {
+
+        }
+        public WordPairGenerator() : base("../../../../data/word_pairs.csv") {
+        
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
         {
-            BigramGenerator gen = new BigramGenerator();
+            WordGenerator gen = new WordGenerator();
             SortedDictionary<char, int> stat = new SortedDictionary<char, int>();
             for(int i = 0; i < 1000; i++) 
             {
